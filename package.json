@@ -1,0 +1,38 @@
+{
+  "name": "weatherapp",
+  "version": "1.0.0",
+  "description": "Weather control applikáció",
+  "keywords": [
+    "Nodemon",
+    "mysql",
+    "express"
+  ],
+  "homepage": "https://github.com/kan-andras/Weatherapp#readme",
+  "bugs": {
+    "url": "https://github.com/kan-andras/Weatherapp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kan-andras/Weatherapp.git"
+  },
+  "license": "ISC",
+  "author": "KAN",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "mysql": "^2.18.1",
+    "regexp": "^1.0.0",
+    "sha1": "^1.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
