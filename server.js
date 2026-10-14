@@ -6,7 +6,7 @@ var cors = require('cors')
 
 const app = express();
 app.use(cors()) // Adds headers: Access-Control-Allow-Origin: *
-const port = 5500;
+const port = 5000;
 const pwdRegExp = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
 var pool = mysql.createPool({
@@ -15,7 +15,7 @@ var pool = mysql.createPool({
   user: 'root',
   password: '',
   port: 3306,
-  database: 'weather_app', // TODO: cseréld a saját adatbázisod nevére
+  database: 'weathercontrol', // TODO: cseréld a saját adatbázisod nevére
   timezone: 'Europe/Budapest'
 });
 
@@ -28,7 +28,6 @@ app.use(express.json());
 
 //Users ENDPOINTS
 //Registration
-//-------------------------------------------
 app.post('/users/register', (req, res) => {
     const { name, email, password, confirm } = req.body;
     if (!name || !email || !password || !confirm) {
@@ -52,7 +51,7 @@ app.post('/users/register', (req, res) => {
         if (results.length > 0){
             return res.status(400).json({error: 'This e-mail already exists'});
         }
-        pool.query('INSERT INTO users (name, email, password, role) VALUES (?, ?, SHA1(?), "user")', [name, email, password], (error, results) =>{
+        pool.query('INSERT INTO users (name, email, passwd, role, status, reg, loginCount) VALUES (?, ?, SHA1(?), "user", 1, CURRENT_TIMESTAMP, 0)', [name, email, password], (error, results) =>{
             if(error){
                 return res.status(500).json({error:'Database query error'});
             }
@@ -69,7 +68,7 @@ app.post('/users/login', (req, res) => {
     return res.status(400).json({ error: 'Missing fields.' });
   }
   //check that email is in the database
-  pool.query('SELECT * FROM users WHERE email=? AND password=SHA1(?)', [email, password], (error, results) => {
+  pool.query('SELECT * FROM users WHERE email=? AND passwd=SHA1(?)', [email, password], (error, results) => {
     if(error){
       return res.status(500).json({error: 'Database query error.'});
     }
@@ -79,7 +78,7 @@ app.post('/users/login', (req, res) => {
     }
 
     //TODO: Check user is active?
-    if(results[0].is_active == 0){
+    if(results[0].status == 0){
       return res.status(400).json({error: 'This user is banned by admin.'});
     }
     
@@ -89,7 +88,7 @@ app.post('/users/login', (req, res) => {
       email: results[0].email,
       role: results[0].role
     };
-    pool.query('UPDATE users set last_login=CURRENT_TIMESTAMP, login_count=login_count+1 WHERE ID=?', [results[0].ID], (error, results) => {
+    pool.query('UPDATE users SET `last`=CURRENT_TIMESTAMP, loginCount=loginCount+1 WHERE ID=?', [results[0].ID], (error, results) => {
     if(error){
       return res.status(500).json({error: 'Database query error.'});
     }
@@ -124,10 +123,10 @@ app.post('/users/:uID/password', (req,res) => {
       return res.status(400).json({error: 'This user doesn\'t exists!'});
     }
     const oldpassHash = sha1(oldpassword);
-    if (results[0].password != oldpassHash){
+    if (results[0].passwd != oldpassHash){
       return res.status(400).json({error: 'The old password is not correct.'})
     }
-    pool.query('UPDATE users SET password=SHA1(?) WHERE ID=?', [newpassword, uID], (error, results) => {
+    pool.query('UPDATE users SET passwd=SHA1(?) WHERE ID=?', [newpassword, uID], (error, results) => {
       if (error){
         return res.status(500).json ({error: 'Database query error.'});
       }
@@ -156,7 +155,7 @@ app.get('/users/:uid/', (req , res) => {
             "name": results[0].name,
             "email": results[0].email,
             "role": results[0].role,
-            "created_at": results[0].created_at,
+            "reg": results[0].reg,
      }
      return res.status(200).json({results: user});
   })
@@ -190,7 +189,7 @@ app.patch('/users/:uid', (req, res) => {
       if (results2.length > 0){
         return res.status(400).json({error: 'This e-mail address is already used!'});
       }
-      pool.query('UPDATE users SET name=?, email=?, updated_at=CURRENT_TIMESTAMP WHERE ID=?', [username, email, uid], (error, results3) =>{
+      pool.query('UPDATE users SET name=?, email=? WHERE ID=?', [username, email, uid], (error, results3) =>{
         if (error){
           return res.status(500).json({error: 'Database query error.'});
         }
@@ -226,7 +225,6 @@ app.delete('/users/:uid/', (req, res) => {
 
 //WEATHER FORECAST ENDPOINTS
 //get forecast list - Vendég is elérheti, csak limitált mezőkkel
-//----------------------------------------------------------------
 app.get('/weather', (req, res) => {
   pool.query(
     'SELECT ID, date, location, temp_min, temp_max, weather_type FROM weather_forecasts ORDER BY date ASC',
@@ -298,7 +296,6 @@ app.post('/admin/weather', (req, res) => {
 
 //create new forecast
 app.post('/admin/weather/new', (req, res) => {
-  //Összes adatot bekérjük a frontendtől.
   const {
     luid, date, location, temp_min, temp_max, weather_type,
     precipitation, precipitation_probability, wind_speed,
@@ -323,7 +320,6 @@ app.post('/admin/weather/new', (req, res) => {
       return res.status(403).json({ error: 'Dont have permission!' });
     }
 
-    //Adatbázis művelet. ? jelek behelyetesítő értékek.
     pool.query(
       `INSERT INTO weather_forecasts
         (date, location, temp_min, temp_max, weather_type, precipitation, precipitation_probability, wind_speed, wind_direction, humidity, pressure, uv_index)
@@ -346,8 +342,6 @@ app.post('/admin/weather/new', (req, res) => {
 //update forecast
 app.patch('/admin/weather/:fid', (req, res) => {
   const fid = req.params.fid;
-
-  //Szintén az összeset bekérjük.
   const {
     luid, date, location, temp_min, temp_max, weather_type,
     precipitation, precipitation_probability, wind_speed,
@@ -380,7 +374,6 @@ app.patch('/admin/weather/:fid', (req, res) => {
         return res.status(400).json({ error: 'Forecast with this ID doesnt exist!' });
       }
 
-      //Adatbázis művelettel update-jük.
       pool.query(
         `UPDATE weather_forecasts SET
            date=?, location=?, temp_min=?, temp_max=?, weather_type=?,
@@ -454,7 +447,7 @@ app.post('/admin/users', (req, res) => {
     if (results1[0].role != 'admin'){
       return res.status(400).json({error: 'Dont have permission!'});
     }
-    pool.query('SELECT * FROM users', (error, results) =>{
+    pool.query('SELECT ID, name, email, role, status, reg, `last`, loginCount FROM users', (error, results) =>{
       if (error) {
         return res.status(500).json({ error: 'Internal server error' });
       }
@@ -488,7 +481,7 @@ app.patch('/admin/status', (req, res) =>{
       return res.status(400).json({error: 'User with this ID doesnt exists!'});
     }
 
-      pool.query('UPDATE users SET is_active = not is_active WHERE ID=?', [uid], (error, results2) =>{
+      pool.query('UPDATE users SET status = NOT status WHERE ID=?', [uid], (error, results2) =>{
         if(error){
           return res.status(500).json({error: 'Database query error.'});
         }
