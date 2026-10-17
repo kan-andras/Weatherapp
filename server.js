@@ -10,13 +10,13 @@ const port = 5000;
 const pwdRegExp = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
 var pool = mysql.createPool({
-  connectionLimit: 10,
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  port: 3306,
-  database: 'weathercontrol', // TODO: cseréld a saját adatbázisod nevére
-  timezone: 'Europe/Budapest'
+  connectionLimit: process.env.APP_CONNECTION,
+  host: process.env.APP_HOST,
+  user: process.env.APP_USER,
+  password: process.env.APP_PASSWORD,
+  port: process.env.APP_PORT,
+  database: process.env.APP_DATABASE,
+  timezone: process.env.APP_TIMEZONE
 });
 
 app.get('/', (_req, res) => {
@@ -88,7 +88,7 @@ app.post('/users/login', (req, res) => {
       email: results[0].email,
       role: results[0].role
     };
-    pool.query('UPDATE users SET `last`=CURRENT_TIMESTAMP, loginCount=loginCount+1 WHERE ID=?', [results[0].ID], (error, results) => {
+    pool.query('UPDATE users SET `last`=CURRENT_TIMESTAMP, loginCount=COALESCE(loginCount,0)+1 WHERE ID=?', [results[0].ID], (error, results) => {
     if(error){
       return res.status(500).json({error: 'Database query error.'});
     }
