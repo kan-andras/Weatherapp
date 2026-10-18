@@ -1,0 +1,39 @@
+### Get user profile
+GET http://localhost:5000/users/1
+Content-Type: application/json
+
+### Update user profile
+PATCH http://localhost:5000/users/1
+Content-Type: application/json
+
+{
+  "username": "Kovacs Janos Modositott",
+  "email": "kovacs.jani@example.com",
+  "luid": 3
+}
+
+### Change password
+POST http://localhost:5000/users/1/password
+Content-Type: application/json
+
+{
+  "oldpassword": "TitkosJelszo2026!",
+  "newpassword": "UjTitkosJelszo2026!",
+  "confirm": "UjTitkosJelszo2026!"
+}
+
+## Simple wweather forecast list for guest
+POST http://localhost:5000/weather/1
+Content-Type: application/json
+
+{
+  "luid": 3
+}
+
+### Delete user profile
+DELETE http://localhost:5000/users/1
+Content-Type: application/json
+
+{
+  "luid": 3
+}

@@ -237,7 +237,7 @@ app.get('/weather', (req, res) => {
   );
 });
 
-//get single day detailed forecast - csak bejelentkezett user/admin (luid alapján)
+//csak bejelentkezett user/admin (luid alapján)
 app.post('/weather/:fid', (req, res) => {
   const fid = req.params.fid;
   const luid = req.body.luid;

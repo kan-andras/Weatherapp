@@ -1,0 +1,38 @@
+### 1. Public weather list(Guest)
+GET http://localhost:5000/weather
+
+### 2. Single day detailed forecast(User / Admin)
+POST http://localhost:5000/weather/3
+Content-Type: application/json
+
+{
+  "luid": 3
+}
+
+### 3. Admin weather list(All details)
+POST http://localhost:5000/admin/weather
+Content-Type: application/json
+
+{
+  "luid": 1
+}
+
+### 4. Create new forecast(Admin)
+POST http://localhost:5000/admin/weather/new
+Content-Type: application/json
+
+{
+  "luid": 1,
+  "date": "2026-07-01",
+  "location": "Balaton",
+  "temp_min": 20,
+  "temp_max": 33,
+  "weather_type": "Napos",
+  "precipitation": 0,
+  "precipitation_probability": 5,
+  "wind_speed": 10,
+  "wind_direction": "D",
+  "humidity": 60,
+  "pressure": 1015,
+  "uv_index": 9
+}

@@ -1,0 +1,72 @@
+### Get all users (Admin only)
+POST http://localhost:5000/admin/users
+Content-Type: application/json
+
+{
+  "luid": 1
+}
+
+### Change user status (Ban / Unban)
+PATCH http://localhost:5000/admin/status
+Content-Type: application/json
+
+{
+  "uid": 3,
+  "luid": 1
+}
+
+### Get all weather forecasts - Admin table view
+POST http://localhost:5000/admin/weather
+Content-Type: application/json
+
+{
+  "luid": 1
+}
+
+### Create new weather forecast (Admin)
+POST http://localhost:5000/admin/weather/new
+Content-Type: application/json
+
+{
+  "luid": 1,
+  "date": "2026-06-15",
+  "location": "Budapest",
+  "temp_min": 18,
+  "temp_max": 30,
+  "weather_type": "Napos",
+  "precipitation": 0,
+  "precipitation_probability": 10,
+  "wind_speed": 12,
+  "wind_direction": "ÉNY",
+  "humidity": 45,
+  "pressure": 1014,
+  "uv_index": 7
+}
+
+### Update weather forecast (Admin)
+PATCH http://localhost:5000/admin/weather/1
+Content-Type: application/json
+
+{
+  "luid": 1,
+  "date": "2026-06-15",
+  "location": "Budapest",
+  "temp_min": 19,
+  "temp_max": 32,
+  "weather_type": "Kissé felhős",
+  "precipitation": 0,
+  "precipitation_probability": 20,
+  "wind_speed": 15,
+  "wind_direction": "ÉK",
+  "humidity": 50,
+  "pressure": 1012,
+  "uv_index": 8
+}
+
+### Delete weather forecast (Admin)
+DELETE http://localhost:5000/admin/weather/1
+Content-Type: application/json
+
+{
+  "luid": 1
+}
