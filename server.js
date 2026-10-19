@@ -77,7 +77,6 @@ app.post('/users/login', (req, res) => {
 
     }
 
-    //TODO: Check user is active?
     if(results[0].status == 0){
       return res.status(400).json({error: 'This user is banned by admin.'});
     }
@@ -92,7 +91,6 @@ app.post('/users/login', (req, res) => {
     if(error){
       return res.status(500).json({error: 'Database query error.'});
     }
-    //TODO: send logged user data to frontend
     return res.status(200).json({message: 'You are successfully logged in!', loggedUser});
     })
     //return res.status(200).json({message: 'You are successfully logged in!'});
@@ -299,8 +297,7 @@ app.post('/admin/weather/new', (req, res) => {
   const {
     luid, date, location, temp_min, temp_max, weather_type,
     precipitation, precipitation_probability, wind_speed,
-    wind_direction, humidity, pressure, uv_index
-  } = req.body;
+    wind_direction, humidity, pressure, uv_index} = req.body;
 
   if (!luid || !date || !location || temp_min == null || temp_max == null || !weather_type) {
     return res.status(400).json({ error: 'Missing fields.' });
@@ -324,11 +321,9 @@ app.post('/admin/weather/new', (req, res) => {
       `INSERT INTO weather_forecasts
         (date, location, temp_min, temp_max, weather_type, precipitation, precipitation_probability, wind_speed, wind_direction, humidity, pressure, uv_index)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        date, location, temp_min, temp_max, weather_type,
+      [ date, location, temp_min, temp_max, weather_type,
         precipitation || 0, precipitation_probability || 0, wind_speed || 0,
-        wind_direction || '', humidity || 0, pressure || 0, uv_index || 0
-      ],
+        wind_direction || '', humidity || 0, pressure || 0, uv_index || 0],
       (error, results) => {
         if (error) {
           return res.status(500).json({ error: 'Database query error.' });
@@ -345,8 +340,7 @@ app.patch('/admin/weather/:fid', (req, res) => {
   const {
     luid, date, location, temp_min, temp_max, weather_type,
     precipitation, precipitation_probability, wind_speed,
-    wind_direction, humidity, pressure, uv_index
-  } = req.body;
+    wind_direction, humidity, pressure, uv_index} = req.body;
 
   if (!fid || !luid || !date || !location || temp_min == null || temp_max == null || !weather_type) {
     return res.status(400).json({ error: 'Missing fields.' });
@@ -384,7 +378,7 @@ app.patch('/admin/weather/:fid', (req, res) => {
           date, location, temp_min, temp_max, weather_type,
           precipitation || 0, precipitation_probability || 0, wind_speed || 0,
           wind_direction || '', humidity || 0, pressure || 0, uv_index || 0, fid
-        ],
+    ],
         (error, results3) => {
           if (error) {
             return res.status(500).json({ error: 'Database query error.' });
